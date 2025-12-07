@@ -1,1 +1,1 @@
-# str-p2
+# STR: Práctica 2
