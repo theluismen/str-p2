@@ -1,7 +1,10 @@
+prod.out : ex4_prod.c
+	gcc -Wall ex4_prod.c -o prod.out
 
+cons.out : ex4_cons.c
+	gcc -Wall ex4_cons.c -o cons.out
 
-ex4.out : ex4.c
-	gcc ex4.c -o ex4.out -pthread -lrt
-
+all: prod.out cons.out
+	
 clean:
-	rm ex4.out
+	rm -f prod.out cons.out
