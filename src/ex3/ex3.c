@@ -14,7 +14,7 @@ void * funcion_hilo_prod ( void * arg ) {
 	char mensaje[QUEUE_MSG_SIZE+1];
 	unsigned int prioridad, i;
 	
-    for ( i = 0; i < QUEUE_MAX_MSG; i++ ) {
+    for ( i = 1; i <= QUEUE_MAX_MSG; i++ ) {
 		sprintf(mensaje, "MSG %d", i);
 		prioridad = i % 2;
 		if ( mq_send(cola, mensaje, strlen(mensaje)+1, prioridad) != -1 ) {
@@ -34,16 +34,16 @@ void * funcion_hilo_cons ( void * arg ) {
     unsigned int prioridad, i;
     ssize_t msg_len;
 
-    for ( i = 0; i < QUEUE_MAX_MSG; i++ ) {
+    for ( i = 1; i <= QUEUE_MAX_MSG; i++ ) {
         // Bloqueante: espera hasta que haya un mensaje
-        msg_len = mq_receive(cola, mensaje, QUEUE_MSG_SIZE, &prioridad);
+        msg_len = mq_receive(cola, mensaje, QUEUE_MSG_SIZE+1, &prioridad);
 
-        if (msg_len >= 0) {
+        if ( msg_len >= 0 ) {
             // Asegurarse de que el mensaje está null-terminated
             mensaje[msg_len] = '\0';
             printf("[CONS] <- (%8s,%2d)\n", mensaje, prioridad);
         } else {
-            perror("mq_receive");
+            perror("mq_receive error");
         }
     }
 
@@ -59,7 +59,7 @@ int main ( void ) {
 	
 	attr.mq_flags   = 0;
 	attr.mq_maxmsg  = QUEUE_MAX_MSG;
-	attr.mq_msgsize = QUEUE_MSG_SIZE;
+	attr.mq_msgsize = QUEUE_MSG_SIZE+1;
 	attr.mq_curmsgs = 0;
 	
 	mq_unlink(QUEUE_NAME);
