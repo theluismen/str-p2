@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sched.h>
 
-#define NUM_THREADS 3
+#define NUM_THREADS 4
 
 // Estructura para los hilos
 struct Hilo_Info {
@@ -17,7 +17,8 @@ struct Hilo_Info {
 void * funcion_hilo ( void * arg ) {
     struct Hilo_Info * data = ( struct Hilo_Info * ) arg;
     struct sched_param param;
-    int i;
+    volatile int temp;
+    int i, j;
     
     param.sched_priority = data->prior;
     
@@ -26,13 +27,13 @@ void * funcion_hilo ( void * arg ) {
     printf("Hilo %d: SCHED = %d, PRIOR = %d\n", data->hilo, data->sched, data->prior);
     
     // Hacer que el hilo realice alguna operación para observar el comportamiento
-    for ( i = 0; i < 10; i++ ) {
+    for ( i = 0; i < 8; i++ ) {
+		for ( j = 0; j < 100000000; j++ ) {
+			// Realizar un cálculo sencillo para consumir tiempo de CPU.
+			temp = j * j;
+		}
         printf("Hilo %d : %d\n", data->hilo, i);
         //usleep(500000);
-		for (int i = 0; i < 100000000; i++) {
-			// Realizar un cálculo sencillo para consumir tiempo de CPU.
-			volatile int temp = i * i;
-		}
     }
     
     pthread_exit(NULL);
@@ -44,8 +45,8 @@ int main() {
     int i;
     
     // Establecer políticas y prioridades para los hilos
-    int scheds[] = {SCHED_FIFO, SCHED_FIFO, SCHED_FIFO };  // Tres políticas de planificación
-    int priors[] = {30, 30, 30};  // Diferentes prioridades
+    int scheds[] = {SCHED_RR, SCHED_RR, SCHED_FIFO, SCHED_FIFO };  // Tres políticas de planificación
+    int priors[] = {10, 10, 20, 20};  // Diferentes prioridades
     
     for ( i = 0; i < NUM_THREADS; i++ ) {
         hilos_info[i].hilo = i + 1;
