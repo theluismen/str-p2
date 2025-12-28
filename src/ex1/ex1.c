@@ -6,34 +6,36 @@
 
 #define NUM_THREADS 4
 
-// Estructura para los hilos
+/* Estructura para los hilos */
 struct Hilo_Info {
     int hilo;
     int sched;
     int prior;
 };
 
-// Función que será ejecutada por cada hilo
+/* Función de cada hilo */
 void * funcion_hilo ( void * arg ) {
     struct Hilo_Info * data = ( struct Hilo_Info * ) arg;
     struct sched_param param;
     volatile int temp;
     int i, j;
     
+    /* Setear prioridad de hilo */
     param.sched_priority = data->prior;
-    
+    /* Configurar politica y prioridad de hilo*/
     pthread_setschedparam(pthread_self(), data->sched, &param);
     
+    /* Mensaje de Creación de hilo */
     printf("Hilo %d: SCHED = %d, PRIOR = %d\n", data->hilo, data->sched, data->prior);
     
-    // Hacer que el hilo realice alguna operación para observar el comportamiento
+    /* Bucle de mostrar mensajes */
     for ( i = 0; i < 8; i++ ) {
+		/* Bucle de retardo */
 		for ( j = 0; j < 100000000; j++ ) {
 			// Realizar un cálculo sencillo para consumir tiempo de CPU.
 			temp = j * j;
 		}
         printf("Hilo %d : %d\n", data->hilo, i);
-        //usleep(500000);
     }
     
     pthread_exit(NULL);
@@ -42,12 +44,11 @@ void * funcion_hilo ( void * arg ) {
 int main() {
     pthread_t hilos[NUM_THREADS];
     struct Hilo_Info hilos_info[NUM_THREADS];
+    int scheds[] = {SCHED_RR, SCHED_RR, SCHED_FIFO, SCHED_FIFO };  // Políticas de planificación
+    int priors[] = {10, 10, 20, 20};  // Prioridades
     int i;
     
-    // Establecer políticas y prioridades para los hilos
-    int scheds[] = {SCHED_RR, SCHED_RR, SCHED_FIFO, SCHED_FIFO };  // Tres políticas de planificación
-    int priors[] = {10, 10, 20, 20};  // Diferentes prioridades
-    
+    /* Bucle de Creación de Hilos */
     for ( i = 0; i < NUM_THREADS; i++ ) {
         hilos_info[i].hilo = i + 1;
         hilos_info[i].sched = scheds[i];
@@ -56,7 +57,7 @@ int main() {
         pthread_create(&hilos[i], NULL, funcion_hilo, (void*) &hilos_info[i]);
     }
     
-    // Esperar a que todos los hilos terminen
+    /* Bucle de Espera de Hilos */
     for ( i = 0; i < NUM_THREADS; i++ ) {
         pthread_join(hilos[i], NULL);
     }

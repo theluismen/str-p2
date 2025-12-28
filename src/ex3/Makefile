@@ -1,5 +1,3 @@
-
-
 ex3.out : ex3.c
 	gcc -Wall ex3.c -o ex3.out -pthread -lrt
 

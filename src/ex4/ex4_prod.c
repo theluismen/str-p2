@@ -20,6 +20,7 @@ int main ( void ) {
 						"Em vaig enamorar";
 	sem_t * sem_prod, * sem_cons;
 
+	/* Abrir shmem */
 	fd = shm_open(SHMEM_NAME, O_CREAT | O_RDWR, 0666);
 
 	if ( fd == -1 ) {
@@ -27,8 +28,10 @@ int main ( void ) {
         exit(1);
     }
 
-	ftruncate(fd, sizeof(char)); // Obligatorio si escribo
+	/* Dimensionar la shmem */
+	ftruncate(fd, sizeof(char));
 
+	/* Mapear shmem a espacio de direcciones */
 	shmem = mmap(NULL, sizeof(char), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
 	if ( shmem == MAP_FAILED ) {
@@ -36,12 +39,14 @@ int main ( void ) {
         exit(1);
     }
 
+	/* Inicializar Semaforos */
 	sem_prod = sem_open(SEM_PROD_NAME, O_CREAT, 0666, 1);
     sem_cons = sem_open(SEM_CONS_NAME, O_CREAT, 0666, 0);
 
 	printf("Mensaje:\n\n\033[34m%s\033[0m\n\n", msg); // msg en VERDE
 	printf("Escribiendo en memoria compartida...\n");
 	
+	/* Bucle de Envio */
 	for ( i = 0; i < strlen(msg)+1; i++ ) {
 		sem_wait(sem_prod);
 		*shmem = msg[i];
@@ -50,6 +55,7 @@ int main ( void ) {
 	
 	printf("Mensaje Enviado\n\n");
 	
+	/* Cerrar, Desmapear y Desvincular */
 	close(fd);
 	munmap(shmem, sizeof(char));
 	shm_unlink(SHMEM_NAME);
