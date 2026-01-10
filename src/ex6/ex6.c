@@ -8,7 +8,7 @@
 #include <time.h>
 
 // UNCOMMENT THE BLOW LINE TO FIX PRIORITY INVERSION
-// #define USE_PRIO_INHERITANCE
+#define USE_PRIO_INHERITANCE
 
 pthread_mutex_t lock;
 
@@ -65,6 +65,17 @@ void* task_high(void* arg){
 }
 
 int main(){
+    cpu_set_t my_set;        // Define a set of CPUs
+    CPU_ZERO(&my_set);       // Clear the set
+    CPU_SET(0, &my_set);     // Add CPU 0 to the set
+    // Force the current process (and all future threads) to run ONLY on CPU 0
+    if (sched_setaffinity(0, sizeof(cpu_set_t), &my_set) == -1) {
+        perror("sched_setaffinity");
+    } else {
+        printf("--- CPU Affinity set to CORE 0 (Simulating Single Core) ---\n");
+    }
+
+
     pthread_t t_low, t_med, t_high;
     pthread_mutexattr_t mutex_attr;
     struct sched_param param;
@@ -74,9 +85,9 @@ int main(){
 
     #ifdef USE_PRIO_INHERITANCE
         printf("ENABELING PRIORITY INHERITANCE (INVERSION WON'T HAPPEN)\n");
-        pthread_mutexatt_setprotocol(&mutex_attr, PTHREAD_PRIO_INHERIT);
+        pthread_mutexattr_setprotocol(&mutex_attr, PTHREAD_PRIO_INHERIT);
     #else
-        printf("NO PRIORITY INHERITANCE (INVERSION WILL HAPPEN)");
+        printf("NO PRIORITY INHERITANCE (INVERSION WILL HAPPEN)\n");
     #endif
 
     pthread_mutex_init(&lock, &mutex_attr);
