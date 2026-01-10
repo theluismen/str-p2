@@ -7,7 +7,7 @@
 #include <sched.h>
 #include <time.h>
 
-// UNCOMMENT THE BLOW LINE TO FIX PRIORITY INVERSION
+// UNCOMMENT/COMMENT THE BLOW LINE TO FIX PRIORITY INVERSION
 #define USE_PRIO_INHERITANCE
 
 pthread_mutex_t lock;
